@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+DIR=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+if [ ! -x "$DIR/bin/uvcctl" ] || [ "$DIR/src/uvcctl.c" -nt "$DIR/bin/uvcctl" ]; then
+    make -C "$DIR" >/dev/null
+fi
+if [ "${1:-}" = ui ] || [ "${1:-}" = serve ]; then
+    make -C "$DIR" bin/preview >/dev/null
+fi
+if [ "${1:-}" = ui ]; then
+    shift
+    (sleep 1; open http://127.0.0.1:8765) &
+    exec /usr/bin/python3 "$DIR/webcam_settings.py" serve "$@"
+fi
+exec /usr/bin/python3 "$DIR/webcam_settings.py" "$@"
